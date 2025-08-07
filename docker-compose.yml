@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: cloud-custodian-ui-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./outputs:/app/outputs
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - RELOAD=False
+      # SSO Configuration (uncomment and set these values to enable SSO)
+      #- SSO_ENABLED=true
+      #- SSO_DEFAULT_PROVIDER=azure
+      #- USE_LEGACY_AUTH=true
+      #- SSO_SESSION_TIMEOUT=3600
+      #- JWT_SECRET=your-secure-secret-key-change-me
+      #- SSO_REDIRECT_URI=http://localhost/auth/callback
+      # Azure AD SSO (uncomment and configure if using Azure AD)
+      #- AZURE_CLIENT_ID=your-client-id
+      #- AZURE_CLIENT_SECRET=your-client-secret
+      #- AZURE_TENANT_ID=your-tenant-id
+      # Okta SSO (uncomment and configure if using Okta)
+      #- OKTA_CLIENT_ID=your-client-id
+      #- OKTA_CLIENT_SECRET=your-client-secret
+      #- OKTA_DOMAIN=your-okta-domain
+      # AWS SSO (uncomment and configure if using AWS SSO)
+      #- AWS_SSO_CLIENT_ID=your-client-id
+      #- AWS_SSO_CLIENT_SECRET=your-client-secret
+      #- AWS_SSO_DOMAIN=your-sso-domain
+    networks:
+      - cloud-custodian-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: cloud-custodian-ui-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cloud-custodian-network
+
+networks:
+  cloud-custodian-network:
+    driver: bridge
